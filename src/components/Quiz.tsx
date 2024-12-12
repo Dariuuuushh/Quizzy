@@ -1,21 +1,31 @@
-import React from "react";
-import questions from "../data/questions.json";
+import React, { useEffect, useState } from "react";
+import { fetchQuestions } from "../services/api";
+import { IQuestion } from "../interfaces/IQuestion";
+import { Box, Typography } from "@mui/material";
 
 const Quiz: React.FC = () => {
+  const [questions, setQuestions] = useState<IQuestion[]>([]);
+
+  useEffect(() => {
+    fetchQuestions().then(setQuestions);
+  }, []);
+
   return (
-    <div>
-      <h1>Quiz</h1>
+    <Box>
+      <Typography variant="h1">Quiz</Typography>
       {questions.map((question, index) => (
-        <div key={question.id}>
-          <h2>{`${index + 1}. ${question.text}`}</h2>
+        <Box key={question.id}>
+          <Typography variant="h2">{`${index + 1}. ${
+            question.text
+          }`}</Typography>
           <ul>
             {question.options.map((option, i) => (
               <li key={i}>{option}</li>
             ))}
           </ul>
-        </div>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 };
 
