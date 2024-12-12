@@ -1,0 +1,15 @@
+[
+    {
+      "id": 1,
+      "text": "Was ist die Hauptstadt von Frankreich?",
+      "options": ["Berlin", "Madrid", "Paris", "Rom"],
+      "correctOptionIndex": 2
+    },
+    {
+      "id": 2,
+      "text": "Welches Element hat das chemische Symbol O?",
+      "options": ["Gold", "Sauerstoff", "Osmium", "Silber"],
+      "correctOptionIndex": 1
+    }
+  ]
+  
