@@ -1,6 +1,9 @@
 export interface IQuestion {
-    id: string;
-    text: string;
-    options: string[];
-    correctOptionIndex: number;
+    id: number;
+    question: string;
+    correctAnswer: string;
+    incorrectAnswers: string[];
+    category: string;
+    type: string;
+    difficilty: string;
 }

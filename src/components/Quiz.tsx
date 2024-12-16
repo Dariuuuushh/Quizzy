@@ -1,32 +1,28 @@
-import React, { useEffect, useState } from "react";
-import { fetchQuestions } from "../services/api";
+import { useState } from "react";
 import { IQuestion } from "../interfaces/IQuestion";
-import { Box, Typography } from "@mui/material";
+import { Button, Paper, Typography } from "@mui/material";
 
-const Quiz: React.FC = () => {
-  const [questions, setQuestions] = useState<IQuestion[]>([]);
-
-  useEffect(() => {
-    fetchQuestions().then(setQuestions);
-  }, []);
+export default function Quiz(props: { questions: IQuestion[] }) {
+  const [index, setIndex] = useState<number>(0);
 
   return (
-    <Box>
-      <Typography variant="h1">Quiz</Typography>
-      {questions.map((question, index) => (
+    <Paper sx={{ my: 1 }}>
+      <Typography variant="h1">{`Category: ${props.questions[index].category}`}</Typography>
+      <Typography variant="h1">{`Type: ${props.questions[index].type}`}</Typography>
+      <Typography variant="h1">{`Difficulty: ${props.questions[index].difficilty}`}</Typography>
+      <Paper>
+        <Typography>{props.questions[index].question}</Typography>
+      </Paper>
+      {/* {props.questions.map((question, index) => (
         <Box key={question.id}>
           <Typography variant="h2">{`${index + 1}. ${
-            question.text
+            question.question
           }`}</Typography>
-          <ul>
-            {question.options.map((option, i) => (
-              <li key={i}>{option}</li>
-            ))}
-          </ul>
         </Box>
-      ))}
-    </Box>
+      ))} */}
+      <Button variant="contained" onClick={() => setIndex(index + 1)}>
+        Confirm
+      </Button>
+    </Paper>
   );
-};
-
-export default Quiz;
+}
