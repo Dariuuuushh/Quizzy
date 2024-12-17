@@ -1,19 +1,24 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Typography, Button } from "@mui/material";
+import { PageContainer } from "@toolpad/core";
+import { useNavigate } from "react-router-dom";
 
-function Home() {
+export default function Home() {
+  const navigate = useNavigate();
+
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Willkommen bei Quizzy!
-      </Typography>
+    <PageContainer title="Welcome to Quizzy!">
       <Typography>
-        Teste dein Wissen mit unseren spannenden Quizfragen.
+        Are you ready to get dizzy from Quizzy? Then you've come to the right
+        place!
       </Typography>
-      <Button variant="contained" color="primary">
-        Quiz starten
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => navigate("/play")}
+        sx={{ mt: 2, maxWidth: "fit-content" }}
+      >
+        Start quiz
       </Button>
-    </Box>
+    </PageContainer>
   );
 }
-
-export default Home;

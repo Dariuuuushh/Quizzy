@@ -18,6 +18,7 @@ import { Category } from "../enums/Category";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import axios from "axios";
 import { IQuestion } from "../interfaces/IQuestion";
+import { SettingsKey } from "../pages/Play";
 
 export default function QuizSettings(props: {
   setQuestions: Dispatch<SetStateAction<IQuestion[]>>;
@@ -30,50 +31,58 @@ export default function QuizSettings(props: {
     }>
   >;
 }) {
-  const handleChangeCategory = (event: SelectChangeEvent<Category>) => {
-    const value = event.target.value;
-
-    if (Object.values(Category).includes(value as Category)) {
-      props.setSettings((oldValues) => {
-        return { ...oldValues, category: value as Category };
-      });
+  const updateSettings = <T extends string | number>(
+    key: SettingsKey,
+    value: T,
+    enumType: { [key: string]: T }
+  ) => {
+    if (Object.values(enumType).includes(value)) {
+      props.setSettings((oldValues) => ({
+        ...oldValues,
+        [key]: value,
+      }));
     }
+  };
+
+  const handleChangeCategory = (event: SelectChangeEvent<Category>) => {
+    updateSettings("category", event.target.value, Category);
   };
 
   const handleChangeDifficulty = (event: SelectChangeEvent<Difficulty>) => {
-    const value = event.target.value;
-
-    if (Object.values(Difficulty).includes(value as Difficulty)) {
-      props.setSettings((oldValues) => {
-        return { ...oldValues, difficulty: value as Difficulty };
-      });
-    }
+    updateSettings("difficulty", event.target.value, Difficulty);
   };
 
   const handleChangeType = (event: SelectChangeEvent<Type>) => {
-    const value = event.target.value;
-
-    if (Object.values(Type).includes(value as Type)) {
-      props.setSettings((oldValues) => {
-        return { ...oldValues, type: value as Type };
-      });
-    }
+    updateSettings("type", event.target.value, Type);
   };
+
+  function shuffleArray<T>(array: T[]): T[] {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+
+      [shuffledArray[i], shuffledArray[j]] = [
+        shuffledArray[j],
+        shuffledArray[i],
+      ];
+    }
+    return shuffledArray;
+  }
 
   const handleClickSave = async () => {
     try {
       const response = await axios.get(
         `http://localhost:5268/api/questions?category=${props.settings.category}&type=${props.settings.type}&difficulty=${props.settings.difficulty}`
       );
-      console.log("Response", response.data);
-      props.setQuestions(response.data);
+      const shuffledArray: IQuestion[] = shuffleArray(response.data);
+      props.setQuestions(shuffledArray);
     } catch (error) {
       console.error("Error fetching questions", error);
     }
   };
 
   return (
-    <Accordion>
+    <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         Choose your settings
       </AccordionSummary>

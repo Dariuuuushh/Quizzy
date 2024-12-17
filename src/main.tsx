@@ -1,21 +1,47 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Quizzy from "./Quizzy.tsx";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home.tsx";
 import Play from "./pages/Play.tsx";
+import Results from "./pages/Results.tsx";
+import Layout from "./layout/Layout.tsx";
+import ErrorPage from "./pages/ErrorPage.tsx";
+import OAuthSignInPage from "./pages/OAuthSignInPage.tsx";
+
+export const router = createBrowserRouter([
+  {
+    element: <Quizzy />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/sign-in",
+        element: <OAuthSignInPage />,
+      },
+      {
+        path: "/",
+        element: <Layout />,
+        children: [
+          {
+            path: "/home",
+            element: <Home />,
+          },
+          {
+            path: "/play",
+            element: <Play />,
+          },
+          {
+            path: "/results",
+            element: <Results />,
+          },
+        ],
+      },
+    ],
+  },
+]);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/play" element={<Play />} />
-          <Route path="contact" element={<PlayArrowIcon />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </StrictMode>
 );

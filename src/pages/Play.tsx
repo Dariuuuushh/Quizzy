@@ -1,11 +1,14 @@
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import { IQuestion } from "../interfaces/IQuestion";
 import QuizSettings from "../components/QuizSettings";
-import Quiz from "../components/Quiz";
+import QuizQuestion from "../components/QuizQuestion";
 import { Category } from "../enums/Category";
 import { Difficulty } from "../enums/Difficulty";
 import { Type } from "../enums/Type";
+import { PageContainer } from "@toolpad/core";
+
+export type SettingsKey = "category" | "difficulty" | "type";
 
 function Play() {
   const [questions, setQuestions] = useState<IQuestion[]>([]);
@@ -24,17 +27,19 @@ function Play() {
   }, [questions]);
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Play Quizzy!
-      </Typography>
+    <PageContainer title="Play Quizzy!">
+      <Typography variant="h4" gutterBottom></Typography>
       <QuizSettings
         setQuestions={setQuestions}
         settings={settings}
         setSettings={setSettings}
       />
-      {questions ? <Quiz questions={questions} /> : <></>}
-    </Box>
+      {questions.length > 0 ? (
+        <QuizQuestion questions={questions} settings={settings} />
+      ) : (
+        <></>
+      )}
+    </PageContainer>
   );
 }
 
