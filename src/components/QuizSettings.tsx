@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Difficulty } from "../enums/Difficulty";
 import { Type } from "../enums/Type";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Category } from "../enums/Category";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import axios from "axios";
@@ -31,6 +31,7 @@ export default function QuizSettings(props: {
     }>
   >;
 }) {
+  const [expanded, setExpanded] = useState<boolean>(true);
   const updateSettings = <T extends string | number>(
     key: SettingsKey,
     value: T,
@@ -72,10 +73,11 @@ export default function QuizSettings(props: {
   const handleClickSave = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5268/api/questions?category=${props.settings.category}&type=${props.settings.type}&difficulty=${props.settings.difficulty}`
+        `api/questions?category=${props.settings.category}&type=${props.settings.type}&difficulty=${props.settings.difficulty}`
       );
       const shuffledArray: IQuestion[] = shuffleArray(response.data);
       props.setQuestions(shuffledArray);
+      setExpanded(false);
     } catch (error) {
       console.error("Error fetching questions", error);
     }

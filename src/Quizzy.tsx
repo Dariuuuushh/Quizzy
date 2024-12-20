@@ -5,6 +5,8 @@ import { Outlet } from "react-router-dom";
 import { AppProvider, Navigation } from "@toolpad/core/AppProvider";
 import PsychologyAltIcon from "@mui/icons-material/PsychologyAlt";
 import AppProviderRouter from "./services/AppProviderRouter";
+import { useEffect, useMemo } from "react";
+import { useSession } from "./SessionWrapper/useSession";
 
 const NAVIGATION: Navigation = [
   {
@@ -33,21 +35,52 @@ const BRANDING = {
   logo: <PsychologyAltIcon sx={{ height: "40px", width: "40px" }} />,
 };
 
-const authentication = {
-  signIn: () => {
-    window.location.href = "/sign-in";
-  },
-  signOut: () => {
-    console.log("User signed out");
-    window.location.href = "/";
-  },
-};
-
 export default function Quizzy() {
+  const session = useSession();
+  const authentication = useMemo(() => {
+    return {
+      signIn: () => {
+        window.location.href = "/sign-in";
+      },
+      signOut: async () => {
+        const token = localStorage.getItem("jwtToken");
+
+        if (!token) {
+          console.error("No token found, redirecting to home page.");
+          window.location.href = "/";
+          return;
+        }
+
+        try {
+          const response = await fetch("api/signout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            console.log("User successfully signed out");
+          } else {
+            console.error("Failed to sign out:", response.statusText);
+          }
+        } catch (error) {
+          console.error("Error during sign out:", error);
+        } finally {
+          console.log("Removing jwtToken");
+          localStorage.removeItem("jwtToken");
+          window.location.href = "/home";
+        }
+      },
+    };
+  }, []);
+
   return (
     <AppProvider
       navigation={NAVIGATION}
       branding={BRANDING}
+      session={session.session}
       authentication={authentication}
       router={AppProviderRouter()}
     >

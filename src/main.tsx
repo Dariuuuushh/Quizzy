@@ -7,7 +7,8 @@ import Play from "./pages/Play.tsx";
 import Results from "./pages/Results.tsx";
 import Layout from "./layout/Layout.tsx";
 import ErrorPage from "./pages/ErrorPage.tsx";
-import OAuthSignInPage from "./pages/OAuthSignInPage.tsx";
+import CredentialsSignInPage from "./pages/CredentialsSignInPage.tsx";
+import { SessionWrapperProvider } from "./SessionWrapper/SessionWrapperProvider.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -16,7 +17,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/sign-in",
-        element: <OAuthSignInPage />,
+        element: <CredentialsSignInPage />,
       },
       {
         path: "/",
@@ -42,6 +43,8 @@ export const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <SessionWrapperProvider>
+      <RouterProvider router={router} />
+    </SessionWrapperProvider>
   </StrictMode>
 );

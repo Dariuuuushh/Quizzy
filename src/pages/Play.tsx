@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { IQuestion } from "../interfaces/IQuestion";
 import QuizSettings from "../components/QuizSettings";
 import QuizQuestion from "../components/QuizQuestion";
@@ -21,10 +21,6 @@ function Play() {
     category: Category.General_Knowledge,
     difficulty: Difficulty.medium,
   });
-
-  useEffect(() => {
-    console.log("Questions", questions);
-  }, [questions]);
 
   return (
     <PageContainer title="Play Quizzy!">

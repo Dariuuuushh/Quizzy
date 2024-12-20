@@ -47,12 +47,6 @@ export default function QuizQuestion(props: {
     setUserAnswer(null);
   }, [index]);
 
-  useEffect(() => {
-    console.log(
-      `Category: ${props.settings.category}, Type: ${props.settings.type}, Difficulty: ${props.settings.difficulty}`
-    );
-  }, [props.settings]);
-
   function shuffleArray<T>(array: T[]): T[] {
     const shuffledArray = [...array];
     for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -87,10 +81,7 @@ export default function QuizQuestion(props: {
 
   const handleSaveResults = async (quizResult: any) => {
     try {
-      // Sende das Ergebnis an den Server
       const response = await axios.post("/api/quiz/results", quizResult);
-
-      // Wenn der Server das Ergebnis erfolgreich speichert, leite zur Results-Seite weiter
       navigate("/results", {
         state: { userId: response.data.userId },
       });
