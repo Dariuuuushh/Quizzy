@@ -14,8 +14,10 @@ import {
 import { Category } from "../enums/Category";
 import { Difficulty } from "../enums/Difficulty";
 import { Type } from "../enums/Type";
+import { useSession } from "../SessionWrapper/useSession";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { ISpecificResult } from "../interfaces/ISpecificResult";
+import { useResult } from "../ResultHook/useResult";
 
 type Color =
   | "success"
@@ -32,8 +34,17 @@ export default function QuizQuestion(props: {
 }) {
   const [index, setIndex] = useState<number>(0);
   const [userAnswer, setUserAnswer] = useState<string | null>(null);
+  const [localResult, setLocalResult] = useState<ISpecificResult>({
+    type: props.settings.type,
+    category: props.settings.category,
+    difficulty: props.settings.difficulty,
+    attempts: 0,
+    successfulAttempts: 0,
+    failedAttempts: 0,
+  });
+  const { setResult } = useResult();
   const [feedback, setFeedback] = useState("");
-  const navigate = useNavigate();
+  const session = useSession();
   const COLORS: Color[] = ["success", "error", "warning", "inherit"];
 
   const shuffledColors = shuffleArray([...COLORS]);
@@ -46,6 +57,10 @@ export default function QuizQuestion(props: {
   useEffect(() => {
     setUserAnswer(null);
   }, [index]);
+
+  useEffect(() => {
+    setResult(localResult);
+  }, [localResult, setResult]);
 
   function shuffleArray<T>(array: T[]): T[] {
     const shuffledArray = [...array];
@@ -71,19 +86,43 @@ export default function QuizQuestion(props: {
   const handleClickAnswer = (answer: string) => {
     setUserAnswer(answer);
     if (answer === props.questions[index].correctAnswer) {
+      setLocalResult((prevResult) => {
+        return {
+          ...prevResult,
+          attempts: prevResult.attempts + 1,
+          successfulAttempts: prevResult.successfulAttempts + 1,
+        };
+      });
       setFeedback("Correct! ✅");
     } else {
+      setLocalResult((prevResult) => {
+        return {
+          ...prevResult,
+          attempts: prevResult.attempts + 1,
+          failedAttempts: prevResult.failedAttempts + 1,
+        };
+      });
       setFeedback(
-        `Wrong! ❌ The correct answer was: ${props.questions[index].correctAnswer}`
+        `Wrong! ❌ The correct answer was: ${decodeHtmlEntities(props.questions[index].correctAnswer)}`
       );
     }
   };
 
-  const handleSaveResults = async (quizResult: any) => {
+  const handleSaveResults = async () => {
     try {
-      const response = await axios.post("/api/quiz/results", quizResult);
-      navigate("/results", {
-        state: { userId: response.data.userId },
+      console.log(localResult);
+      const response = await axios.post(
+        `/api/results/${session.session?.user?.id}`,
+        localResult
+      );
+      console.log(response);
+      setLocalResult((prevResult) => {
+        return {
+          ...prevResult,
+          attempts: 0,
+          successfulAttempts: 0,
+          failedAttempts: 0,
+        };
       });
     } catch (error) {
       console.error("Error saving quiz result:", error);
@@ -187,6 +226,7 @@ export default function QuizQuestion(props: {
           variant="contained"
           sx={{ m: 1, ml: 0 }}
           onClick={handleSaveResults}
+          disabled={session.session?.user ? false : true}
         >
           Save results
         </Button>

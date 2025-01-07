@@ -19,17 +19,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import axios from "axios";
 import { IQuestion } from "../interfaces/IQuestion";
 import { SettingsKey } from "../pages/Play";
+import { ISettings } from "../interfaces/ISettings";
 
 export default function QuizSettings(props: {
   setQuestions: Dispatch<SetStateAction<IQuestion[]>>;
-  settings: { type: Type; category: Category; difficulty: Difficulty };
-  setSettings: Dispatch<
-    SetStateAction<{
-      type: Type;
-      category: Category;
-      difficulty: Difficulty;
-    }>
-  >;
+  settings: ISettings;
+  setSettings: Dispatch<SetStateAction<ISettings>>;
 }) {
   const [expanded, setExpanded] = useState<boolean>(true);
   const updateSettings = <T extends string | number>(
@@ -84,7 +79,10 @@ export default function QuizSettings(props: {
   };
 
   return (
-    <Accordion defaultExpanded>
+    <Accordion
+      expanded={expanded}
+      onChange={() => setExpanded((prevExpanded) => !prevExpanded)}
+    >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         Choose your settings
       </AccordionSummary>

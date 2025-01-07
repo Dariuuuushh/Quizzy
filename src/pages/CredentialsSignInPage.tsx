@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useSession } from "../SessionWrapper/useSession";
+import axios from "axios";
 
 export default function CredentialsSignInPage() {
   const theme = useTheme();
@@ -14,30 +15,29 @@ export default function CredentialsSignInPage() {
   const providers = [{ id: "credentials", name: "Email and Password" }];
 
   const signIn: (provider: AuthProvider, formData: FormData) => void = async (
-    provider,
+    _provider,
     formData
   ) => {
     const email = formData.get("email");
     const password = formData.get("password");
 
     try {
-      const response = await fetch("api/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post("api/signin", {
+        email,
+        password,
       });
 
-      const data = await response.json();
+      const data = await response.data;
 
-      if (response.ok) {
+      if (response.status === 200) {
         alert("Successfully logged in!");
         localStorage.setItem("authToken", data.token);
         if (email) {
           setSession({
             user: {
+              id: data.user.id.toString(),
               email: email.toString(),
+              name: data.user.username,
             },
           });
         }

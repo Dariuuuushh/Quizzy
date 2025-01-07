@@ -9,6 +9,7 @@ import Layout from "./layout/Layout.tsx";
 import ErrorPage from "./pages/ErrorPage.tsx";
 import CredentialsSignInPage from "./pages/CredentialsSignInPage.tsx";
 import { SessionWrapperProvider } from "./SessionWrapper/SessionWrapperProvider.tsx";
+import { ResultProvider } from "./ResultHook/ResultProvider.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -24,15 +25,15 @@ export const router = createBrowserRouter([
         element: <Layout />,
         children: [
           {
-            path: "/home",
+            path: "",
             element: <Home />,
           },
           {
-            path: "/play",
+            path: "play",
             element: <Play />,
           },
           {
-            path: "/results",
+            path: "results",
             element: <Results />,
           },
         ],
@@ -44,7 +45,9 @@ export const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <SessionWrapperProvider>
-      <RouterProvider router={router} />
+      <ResultProvider>
+        <RouterProvider router={router} />
+      </ResultProvider>
     </SessionWrapperProvider>
   </StrictMode>
 );
