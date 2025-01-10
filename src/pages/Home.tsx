@@ -7,7 +7,7 @@ export default function Home() {
 
   return (
     <PageContainer title="Welcome to Quizzy!">
-      <Typography>
+      <Typography variant="h6">
         Are you ready to get dizzy from Quizzy? Then you've come to the right
         place!
       </Typography>

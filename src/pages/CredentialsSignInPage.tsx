@@ -6,11 +6,13 @@ import { IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useSession } from "../SessionWrapper/useSession";
 import axios from "axios";
+import { useDialogs } from "@toolpad/core";
 
 export default function CredentialsSignInPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { setSession } = useSession();
+  const dialogs = useDialogs();
 
   const providers = [{ id: "credentials", name: "Email and Password" }];
 
@@ -30,7 +32,7 @@ export default function CredentialsSignInPage() {
       const data = await response.data;
 
       if (response.status === 200) {
-        alert("Successfully logged in!");
+        dialogs.alert("Successfully logged in!");
         localStorage.setItem("authToken", data.token);
         if (email) {
           setSession({
@@ -43,12 +45,12 @@ export default function CredentialsSignInPage() {
         }
         navigate("/play");
       } else {
-        alert("Error during registration: " + data.error);
+        dialogs.alert("Error during registration: " + data.error);
         setSession(null);
       }
     } catch (error) {
       console.error("Error signing in:", error);
-      alert("An error has occurred.");
+      dialogs.alert("An error has occurred.");
       setSession(null);
     }
   };

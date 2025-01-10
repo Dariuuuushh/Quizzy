@@ -1,6 +1,3 @@
-import HomeIcon from "@mui/icons-material/Home";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import AnalyticsIcon from "@mui/icons-material/Analytics";
 import { Outlet, useNavigate } from "react-router-dom";
 import { AppProvider, Navigation } from "@toolpad/core/AppProvider";
 import PsychologyAltIcon from "@mui/icons-material/PsychologyAlt";
@@ -9,23 +6,61 @@ import { useMemo } from "react";
 import { useSession } from "./SessionWrapper/useSession";
 import { useAuthRestore } from "./services/useAuthRestore";
 import axios from "axios";
+import {
+  Analytics,
+  EmojiEvents,
+  Home,
+  LocalLibrary,
+  PlayArrow,
+  SavedSearch,
+  Storage,
+} from "@mui/icons-material";
 
 const NAVIGATION: Navigation = [
   { kind: "header", title: "Main items" },
-  { title: "Home", icon: <HomeIcon /> },
-  { segment: "play", title: "Play", icon: <PlayArrowIcon /> },
-  { segment: "results", title: "Results", icon: <AnalyticsIcon /> },
+  { title: "Home", icon: <Home /> },
+  { segment: "play", title: "Play", icon: <PlayArrow /> },
+  { segment: "tournaments", title: "Tournaments", icon: <EmojiEvents /> },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Analytics",
+  },
+  {
+    segment: "results",
+    title: "Results",
+    icon: <Analytics />,
+    children: [
+      {
+        segment: "localResults",
+        title: "LocalResults",
+        icon: <LocalLibrary />,
+      },
+      {
+        segment: "specificResults",
+        title: "Specific Results",
+        icon: <SavedSearch />,
+      },
+      {
+        segment: "totalResults",
+        title: "Total Results",
+        icon: <Storage />,
+      },
+    ],
+  },
 ];
-
-const BRANDING = {
-  title: "Quizzy",
-  logo: <PsychologyAltIcon sx={{ height: "40px", width: "40px" }} />,
-};
 
 export default function Quizzy() {
   const { session, setSession } = useSession();
   const navigate = useNavigate();
   useAuthRestore();
+
+  const BRANDING = {
+    title: "Quizzy",
+    logo: <PsychologyAltIcon sx={{ height: "40px", width: "40px" }} />,
+  };
 
   const authentication = useMemo(
     () => ({

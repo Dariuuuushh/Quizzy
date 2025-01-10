@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   SelectChangeEvent,
+  Typography,
 } from "@mui/material";
 import { Difficulty } from "../enums/Difficulty";
 import { Type } from "../enums/Type";
@@ -20,20 +21,32 @@ import axios from "axios";
 import { IQuestion } from "../interfaces/IQuestion";
 import { SettingsKey } from "../pages/Play";
 import { ISettings } from "../interfaces/ISettings";
+import { useSession } from "../SessionWrapper/useSession";
+import { useDialogs } from "@toolpad/core";
+import { useResult } from "../ResultHook/useResult";
 
 export default function QuizSettings(props: {
   setQuestions: Dispatch<SetStateAction<IQuestion[]>>;
-  settings: ISettings;
-  setSettings: Dispatch<SetStateAction<ISettings>>;
 }) {
   const [expanded, setExpanded] = useState<boolean>(true);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
+  const { session, sessionSettings, setSessionSettings } = useSession();
+  const dialogs = useDialogs();
+  const { setResult } = useResult();
+  const [localSettingsBeforeSave, setLocalSettingsBeforeSave] =
+    useState<ISettings>({
+      type: sessionSettings.type,
+      category: sessionSettings.category,
+      difficulty: sessionSettings.difficulty,
+    });
+
   const updateSettings = <T extends string | number>(
     key: SettingsKey,
     value: T,
     enumType: { [key: string]: T }
   ) => {
     if (Object.values(enumType).includes(value)) {
-      props.setSettings((oldValues) => ({
+      setLocalSettingsBeforeSave((oldValues) => ({
         ...oldValues,
         [key]: value,
       }));
@@ -66,15 +79,62 @@ export default function QuizSettings(props: {
   }
 
   const handleClickSave = async () => {
-    try {
-      const response = await axios.get(
-        `api/questions?category=${props.settings.category}&type=${props.settings.type}&difficulty=${props.settings.difficulty}`
+    if (isSaved && session?.user?.id) {
+      const confirmed = await dialogs.confirm(
+        "Are you sure you want to change your Settings before saving them?",
+        {
+          okText: "Yes",
+          cancelText: "No",
+          severity: "warning",
+        }
       );
+      if (confirmed) {
+        setSessionSettings(localSettingsBeforeSave);
+        getQuestions();
+        setResult(() => {
+          return {
+            category: localSettingsBeforeSave.category,
+            difficulty: localSettingsBeforeSave.difficulty,
+            type: localSettingsBeforeSave.type,
+            attempts: 0,
+            successfulAttempts: 0,
+            failedAttempts: 0,
+          };
+        });
+      }
+    } else {
+      setSessionSettings(localSettingsBeforeSave);
+      getQuestions();
+      setResult(() => {
+        return {
+          category: localSettingsBeforeSave.category,
+          difficulty: localSettingsBeforeSave.difficulty,
+          type: localSettingsBeforeSave.type,
+          attempts: 0,
+          successfulAttempts: 0,
+          failedAttempts: 0,
+        };
+      });
+    }
+  };
+
+  const getQuestions = async () => {
+    try {
+      const response = await axios.get("api/questions", {
+        params: {
+          category: localSettingsBeforeSave.category,
+          type: localSettingsBeforeSave.type,
+          difficulty: localSettingsBeforeSave.difficulty,
+        },
+      });
       const shuffledArray: IQuestion[] = shuffleArray(response.data);
       props.setQuestions(shuffledArray);
+      setIsSaved(true);
       setExpanded(false);
     } catch (error) {
-      console.error("Error fetching questions", error);
+      props.setQuestions([]);
+      dialogs.alert(`No questions available for this settings!`);
+      setExpanded(true);
     }
   };
 
@@ -84,14 +144,14 @@ export default function QuizSettings(props: {
       onChange={() => setExpanded((prevExpanded) => !prevExpanded)}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        Choose your settings
+        <Typography variant="h6">Choose your settings</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="row" spacing={2}>
           <FormControl variant="filled" fullWidth sx={{ m: 1 }}>
             <InputLabel>Category</InputLabel>
             <Select
-              value={props.settings.category}
+              value={localSettingsBeforeSave.category}
               onChange={handleChangeCategory}
             >
               {Object.values(Category).map((cat) => (
@@ -104,7 +164,7 @@ export default function QuizSettings(props: {
           <FormControl variant="filled" fullWidth sx={{ m: 1 }}>
             <InputLabel>Difficulty</InputLabel>
             <Select
-              value={props.settings.difficulty}
+              value={localSettingsBeforeSave.difficulty}
               onChange={handleChangeDifficulty}
             >
               {Object.values(Difficulty).map((cat) => (
@@ -116,7 +176,10 @@ export default function QuizSettings(props: {
           </FormControl>
           <FormControl variant="filled" fullWidth sx={{ m: 1 }}>
             <InputLabel>Type</InputLabel>
-            <Select value={props.settings.type} onChange={handleChangeType}>
+            <Select
+              value={localSettingsBeforeSave.type}
+              onChange={handleChangeType}
+            >
               {Object.values(Type).map((cat) => (
                 <MenuItem key={cat} value={cat}>
                   {cat}
@@ -126,7 +189,12 @@ export default function QuizSettings(props: {
           </FormControl>
         </Stack>
         <Box display="flex" justifyContent="right">
-          <Button variant="contained" onClick={handleClickSave} sx={{ my: 1 }}>
+          <Button
+            variant="contained"
+            onClick={handleClickSave}
+            sx={{ my: 1 }}
+            disabled={sessionSettings === localSettingsBeforeSave}
+          >
             Save
           </Button>
         </Box>
